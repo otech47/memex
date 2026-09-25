@@ -1,0 +1,21 @@
+[package]
+name = "memex"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "memex"
+path = "src/main.rs"
+
+[dependencies]
+serde = "1"
+serde_json = { version = "1", features = ["preserve_order"] }
+regex = "1"
+memchr = "2"
+memmap2 = "0.9"
+rayon = "1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
