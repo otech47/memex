@@ -1,0 +1,73 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>memex, how it works</title>
+<style>
+  :root { --bg: #ffffff; --surface: #ffffff; --surface-2: #f4f4f2; --ink: #1c1c1a; --ink-soft: #55554f; --ink-faint: #6b6b62; --line: #e5e5e0; --accent: #3b5bdb; --accent-soft: #edf0fd; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0d1117; --surface: #1e1e24; --surface-2: #26262e; --ink: #ececef; --ink-soft: #b4b4bd; --ink-faint: #90909b; --line: #33333d; --accent: #8098f9; --accent-soft: #232840; }
+  }
+  html, body { margin: 0; background: var(--bg); }
+  body { padding: 20px; width: 1520px; }
+  .node { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+  .node-accent { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
+  .node-soft { fill: var(--surface-2); stroke: var(--line); stroke-width: 1.5; }
+  .edge { stroke: var(--ink-faint); stroke-width: 1.5; fill: none; }
+  .arrowhead path { fill: var(--ink-faint); stroke: none; }
+  .svg-lbl { fill: var(--ink); font: 13px -apple-system, "Segoe UI", Helvetica, sans-serif; }
+  .svg-lbl-b { fill: var(--ink); font: 600 15px -apple-system, "Segoe UI", Helvetica, sans-serif; }
+  .svg-lbl-soft { fill: var(--ink-soft); font: 12px -apple-system, "Segoe UI", Helvetica, sans-serif; }
+  .svg-lbl-accent { fill: var(--accent); font: 600 12px -apple-system, "Segoe UI", Helvetica, sans-serif; letter-spacing: .06em; }
+</style>
+<svg viewBox="0 0 760 300" width="1520" height="600" role="img" aria-label="pipeline from your words through index, ranking and an optional model call to the resume command">
+  <defs>
+    <marker id="ah" class="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z"/></marker>
+  </defs>
+
+  <text x="10" y="24" class="svg-lbl-accent">TRANSCRIPTS ON DISK</text>
+  <rect x="10" y="40" width="150" height="34" rx="8" class="node"/><text x="85" y="62" text-anchor="middle" class="svg-lbl">claude code</text>
+  <rect x="10" y="84" width="150" height="34" rx="8" class="node"/><text x="85" y="106" text-anchor="middle" class="svg-lbl">codex</text>
+  <rect x="10" y="128" width="150" height="34" rx="8" class="node"/><text x="85" y="150" text-anchor="middle" class="svg-lbl">kimi code</text>
+  <rect x="10" y="172" width="150" height="34" rx="8" class="node"/><text x="85" y="194" text-anchor="middle" class="svg-lbl">cursor</text>
+  <text x="85" y="232" text-anchor="middle" class="svg-lbl-soft">every session, read in place</text>
+
+  <path d="M160,57 L198,118" class="edge"/>
+  <path d="M160,101 L198,121" class="edge"/>
+  <path d="M160,145 L198,125" class="edge"/>
+  <path d="M160,189 L198,130" class="edge" marker-end="url(#ah)"/>
+
+  <text x="200" y="24" class="svg-lbl-accent">DETERMINISTIC, UNDER A SECOND</text>
+  <rect x="200" y="84" width="140" height="84" rx="10" class="node-accent"/>
+  <text x="270" y="108" text-anchor="middle" class="svg-lbl-b">index</text>
+  <text x="270" y="128" text-anchor="middle" class="svg-lbl-soft">prompts, title, project,</text>
+  <text x="270" y="144" text-anchor="middle" class="svg-lbl-soft">dates, touched paths</text>
+  <text x="270" y="160" text-anchor="middle" class="svg-lbl-soft">changed files only</text>
+
+  <path d="M340,126 L370,126" class="edge" marker-end="url(#ah)"/>
+
+  <rect x="372" y="84" width="140" height="84" rx="10" class="node-accent"/>
+  <text x="442" y="108" text-anchor="middle" class="svg-lbl-b">rank</text>
+  <text x="442" y="128" text-anchor="middle" class="svg-lbl-soft">rare words count more</text>
+  <text x="442" y="144" text-anchor="middle" class="svg-lbl-soft">titles weigh more</text>
+  <text x="442" y="160" text-anchor="middle" class="svg-lbl-soft">no randomness</text>
+
+  <rect x="372" y="240" width="140" height="40" rx="8" class="node-soft"/>
+  <text x="442" y="265" text-anchor="middle" class="svg-lbl">your words, as dictated</text>
+  <path d="M442,240 L442,170" class="edge" marker-end="url(#ah)"/>
+
+  <path d="M512,126 L542,126" class="edge" marker-end="url(#ah)"/>
+
+  <text x="544" y="24" class="svg-lbl-accent">OPTIONAL, SECONDS</text>
+  <rect x="544" y="84" width="120" height="84" rx="10" class="node"/>
+  <text x="604" y="108" text-anchor="middle" class="svg-lbl-b">pick</text>
+  <text x="604" y="128" text-anchor="middle" class="svg-lbl-soft">a model reads the</text>
+  <text x="604" y="144" text-anchor="middle" class="svg-lbl-soft">top ten prompt lists</text>
+  <text x="604" y="160" text-anchor="middle" class="svg-lbl-soft">memex agent "..."</text>
+
+  <path d="M664,126 L694,126" class="edge" marker-end="url(#ah)"/>
+
+  <text x="696" y="24" class="svg-lbl-accent">OUT</text>
+  <rect x="696" y="84" width="58" height="84" rx="10" class="node-accent"/>
+  <text x="725" y="120" text-anchor="middle" class="svg-lbl-b">id +</text>
+  <text x="725" y="140" text-anchor="middle" class="svg-lbl-b">resume</text>
+  <text x="725" y="192" text-anchor="middle" class="svg-lbl-soft">-r runs it</text>
+</svg>
