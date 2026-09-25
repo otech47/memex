@@ -27,8 +27,8 @@ Everything left of the model call is deterministic and runs in well under a seco
 
 1. **index.** Every transcript on disk is read once into one record per session: its user prompts, title, project, branch, dates and the file paths the agent touched. Injected system text, tool results and hook output are stripped. Later runs reparse only files whose size or mtime changed.
 2. **rank.** Your words are matched against every record. Rare words count more than common ones, a hit in the title or project name counts more than a hit in a late prompt, plurals and -ed/-ing are folded, and recent sessions get a small boost. Same words, same index, same answer every time.
-3. **pick, only with `memex agent`.** The top ten records go to a model along with each one's prompt list, in one call. The model reads what you actually asked for in each session and returns one number. It sees the prompts, not the titles, because a title comes from the first prompt and often names only how a session started.
-4. **resume.** The output is the harness, date, project, id and the exact command that reopens the session. `-r` runs that command for you.
+3. **pick, only with `memex agent`.** The top ten records go to a model along with each one's prompt list, in one call. The model reads what you asked for in each session and returns one number. It sees the prompts, not the titles, because a title comes from the first prompt and often names only how a session started.
+4. **resume.** The output is the harness, date, project, id and the exact command that reopens the session. `-r` runs that command.
 
 ## Usage
 
