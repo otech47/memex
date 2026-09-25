@@ -1,25 +1,25 @@
-# memex, for coding agents
+# recall, for coding agents
 
-memex finds a past coding-agent session on this machine from a description and prints its id and resume command. It reads Claude Code, Codex, Kimi Code and Cursor transcripts in place. One Rust binary, no runtime dependencies.
+recall finds a past coding-agent session on this machine from a description and prints its id and resume command. It reads Claude Code, Codex, Kimi Code and Cursor transcripts in place. One Rust binary, no runtime dependencies.
 
 ## Install
 
-Check first: `command -v memex`. If it is missing:
+Check first: `command -v recall`. If it is missing:
 
 ```
 cargo build --release
 mkdir -p ~/.local/bin
-ln -sf "$PWD/target/release/memex" ~/.local/bin/memex
+ln -sf "$PWD/target/release/recall" ~/.local/bin/recall
 ```
 
-If `cargo` is missing, install it with `curl https://sh.rustup.rs -sSf | sh -s -- -y` and reopen the shell. The first run builds the index at `~/.agents/memex/index.jsonl`, which takes a few seconds on a large machine. Every later run refreshes it in well under a second.
+If `cargo` is missing, install it with `curl https://sh.rustup.rs -sSf | sh -s -- -y` and reopen the shell. The first run builds the index at `~/.agents/recall/index.jsonl`, which takes a few seconds on a large machine. Every later run refreshes it in well under a second.
 
 ## Use
 
 Ranking only, no model call. This is the default and the fastest:
 
 ```
-memex "<the user's description, verbatim>" -x <your own session id> -j
+recall "<the user's description, verbatim>" -x <your own session id> -j
 ```
 
 Always pass `-x` with your own session id. The session asking the question contains the description and would otherwise match itself. Pass `-j` when you are going to read the result. It gives one object per hit with id, harness, project, dates, title, score, matched terms, first prompt and up to 15 prompts.
@@ -38,20 +38,20 @@ Narrow when the user gives you a handle:
 More on one session, and the command that reopens it:
 
 ```
-memex show <id-prefix>
-memex resume <id-prefix>
+recall show <id-prefix>
+recall resume <id-prefix>
 ```
 
 Search the raw transcripts when the words you have are from the agent's output rather than the user's prompts, for example an error string or a file name:
 
 ```
-memex grep '<regex>' -f claude -n 5
+recall grep '<regex>' -f claude -n 5
 ```
 
-Agent mode, which spends one model call on the pick, is for the human at the terminal (`memex agent "..."`). You are already a model. Run the plain search and judge the prompt lists yourself.
+Agent mode, which spends one model call on the pick, is for the human at the terminal (`recall agent "..."`). You are already a model. Run the plain search and judge the prompt lists yourself.
 
 ## Report
 
 Give the user the harness, date, project, title, id and the resume command, and one sentence on why that session matches. If nothing plausible matches, say so and show the top three.
 
-`memex -h` prints the full help.
+`recall -h` prints the full help.

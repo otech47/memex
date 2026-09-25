@@ -1,9 +1,9 @@
-# memex
+# recall
 
 Describe a past coding-agent session from memory and get back its id and the command that reopens it. Works across Claude Code, Codex, Kimi Code and Cursor.
 
 ```
-memex "the one where I made my claude skills and hooks work in codex, then kimi, then cursor"
+recall "the one where I made my claude skills and hooks work in codex, then kimi, then cursor"
 ```
 
 ```
@@ -27,25 +27,25 @@ Everything left of the model call is deterministic and runs in well under a seco
 
 1. **index.** Every transcript on disk is read once into one record per session: its user prompts, title, project, branch, dates and the file paths the agent touched. Injected system text, tool results and hook output are stripped. Later runs reparse only files whose size or mtime changed.
 2. **rank.** Your words are matched against every record. Rare words count more than common ones, a hit in the title or project name counts more than a hit in a late prompt, plurals and -ed/-ing are folded, and recent sessions get a small boost. Same words, same index, same answer every time.
-3. **pick, only with `memex agent`.** The top ten records go to a model along with each one's prompt list, in one call. The model reads what you asked for in each session and returns one number. It sees the prompts, not the titles, because a title comes from the first prompt and often names only how a session started.
+3. **pick, only with `recall agent`.** The top ten records go to a model along with each one's prompt list, in one call. The model reads what you asked for in each session and returns one number. It sees the prompts, not the titles, because a title comes from the first prompt and often names only how a session started.
 4. **resume.** The output is the harness, date, project, id and the exact command that reopens the session. `-r` runs that command.
 
 ## Usage
 
 ```
-memex "<what you remember>"           rank only, no model call
-memex agent "<what you remember>"     rank, then one model call picks. claude sonnet by default
-memex agent -a codex -m gpt-5 "..."   another agent and model do the picking
-memex -r "..."                        run the resume command of the pick or first hit
+recall "<what you remember>"           rank only, no model call
+recall agent "<what you remember>"     rank, then one model call picks. claude sonnet by default
+recall agent -a codex -m gpt-5 "..."   another agent and model do the picking
+recall -r "..."                        run the resume command of the pick or first hit
 
-memex show <id>                       one session in full: prompts, paths, transcript file, resume command
-memex resume <id>                     print the resume command
-memex grep <regex>                    scan the raw transcripts, including assistant output
-memex index                           refresh the index
-memex stats                           sessions per harness, index location
+recall show <id>                       one session in full: prompts, paths, transcript file, resume command
+recall resume <id>                     print the resume command
+recall grep <regex>                    scan the raw transcripts, including assistant output
+recall index                           refresh the index
+recall stats                           sessions per harness, index location
 ```
 
-Every option has a short and a long form. `memex -h` prints the full help.
+Every option has a short and a long form. `recall -h` prints the full help.
 
 | option | what it does |
 |---|---|
@@ -65,17 +65,17 @@ Every option has a short and a long form. `memex -h` prints the full help.
 Needs a Rust toolchain. No runtime dependencies.
 
 ```
-git clone https://github.com/otech47/memex
-cd memex
+git clone https://github.com/otech47/recall
+cd recall
 cargo build --release
-ln -s "$PWD/target/release/memex" ~/.local/bin/memex
+ln -s "$PWD/target/release/recall" ~/.local/bin/recall
 ```
 
-The index lives at `~/.agents/memex/index.jsonl`. `MEMEX_INDEX_DIR` moves it, `MEMEX_AGENT` and `MEMEX_MODEL` set the defaults for agent mode.
+The index lives at `~/.agents/recall/index.jsonl`. `RECALL_INDEX_DIR` moves it, `RECALL_AGENT` and `RECALL_MODEL` set the defaults for agent mode.
 
 ## For agents
 
-`AGENTS.md` in this repo tells a coding agent how to install memex and how to use it. `skills/memex/SKILL.md` is the same guidance as a skill. Point your agent at the repo, or drop the skill into your skills directory.
+`AGENTS.md` in this repo tells a coding agent how to install recall and how to use it. `skills/recall/SKILL.md` is the same guidance as a skill. Point your agent at the repo, or drop the skill into your skills directory.
 
 <details>
 <summary>what gets read, per harness</summary>
@@ -101,6 +101,6 @@ Terms are lowercased, stopwords dropped, and stemmed with Porter steps 1a and 1b
 <details>
 <summary>why the model call is optional, and when you want it</summary>
 
-The ranking alone usually puts the right session in the top two. What it cannot do is tell a session that turned into the thing you describe apart from one whose title names it, because titles come from first prompts. `memex agent` fixes that with one call: the model gets the top ten candidates with up to twelve prompts each, about 4500 tokens, and is told the rank is a strong prior. Sonnet answers in a few seconds. Codex, Kimi and Cursor work too but take longer to start in print mode.
+The ranking alone usually puts the right session in the top two. What it cannot do is tell a session that turned into the thing you describe apart from one whose title names it, because titles come from first prompts. `recall agent` fixes that with one call: the model gets the top ten candidates with up to twelve prompts each, about 4500 tokens, and is told the rank is a strong prior. Sonnet answers in a few seconds. Codex, Kimi and Cursor work too but take longer to start in print mode.
 
 </details>

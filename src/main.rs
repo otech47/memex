@@ -1,5 +1,5 @@
-//! memex: deterministic index and search over Claude Code, Codex, Kimi Code and Cursor transcripts.
-//! One binary: deterministic ranking by default, an optional model pick behind `memex agent`.
+//! recall: deterministic index and search over Claude Code, Codex, Kimi Code and Cursor transcripts.
+//! One binary: deterministic ranking by default, an optional model pick behind `recall agent`.
 
 use memmap2::Mmap;
 use rayon::prelude::*;
@@ -46,7 +46,7 @@ fn home() -> PathBuf {
     PathBuf::from(std::env::var("HOME").expect("HOME"))
 }
 fn index_dir() -> PathBuf {
-    std::env::var("MEMEX_INDEX_DIR").map(PathBuf::from).unwrap_or_else(|_| home().join(".agents").join("memex"))
+    std::env::var("RECALL_INDEX_DIR").map(PathBuf::from).unwrap_or_else(|_| home().join(".agents").join("recall"))
 }
 fn index_file() -> PathBuf {
     index_dir().join("index.jsonl")
@@ -1003,16 +1003,16 @@ fn cmd_show(recs: &[Value], prefix: &str, as_json: bool) {
 
 // ---------------------------------------------------------------- cli
 
-const USAGE: &str = r#"memex: describe a past coding-agent session in your own words and get its id and resume command. Reads every Claude Code, Codex, Kimi Code and Cursor transcript on this machine.
+const USAGE: &str = r#"recall: describe a past coding-agent session in your own words and get its id and resume command. Reads every Claude Code, Codex, Kimi Code and Cursor transcript on this machine.
 
 usage
-  memex "<what you remember>"          rank every session by how well its prompts, title, project and touched files match your words. No model call. Prints the top ten and the resume command of the first.
-  memex agent "<what you remember>"    same ranking, then one model call reads the top ten prompt lists and picks. Claude sonnet by default, 3 to 10 seconds.
-  memex show <id>                      one session in full: metadata, every user prompt, touched paths, transcript file, resume command. Any unambiguous prefix or suffix of the id works.
-  memex resume <id>                    print just the resume command
-  memex grep <regex>                   scan the raw transcripts for a regex (case-insensitive) and rank sessions by hit count. Slower, but sees assistant output and tool results too.
-  memex index                          refresh the index. Incremental: only transcripts whose mtime or size changed are reparsed. Every other command refreshes first.
-  memex stats                          sessions per harness and where the index lives
+  recall "<what you remember>"          rank every session by how well its prompts, title, project and touched files match your words. No model call. Prints the top ten and the resume command of the first.
+  recall agent "<what you remember>"    same ranking, then one model call reads the top ten prompt lists and picks. Claude sonnet by default, 3 to 10 seconds.
+  recall show <id>                      one session in full: metadata, every user prompt, touched paths, transcript file, resume command. Any unambiguous prefix or suffix of the id works.
+  recall resume <id>                    print just the resume command
+  recall grep <regex>                   scan the raw transcripts for a regex (case-insensitive) and rank sessions by hit count. Slower, but sees assistant output and tool results too.
+  recall index                          refresh the index. Incremental: only transcripts whose mtime or size changed are reparsed. Every other command refreshes first.
+  recall stats                          sessions per harness and where the index lives
 
 options
   -r, --resume            run the resume command of the pick (or of the first hit) instead of only printing it
@@ -1032,18 +1032,18 @@ options
   -h, --help              this text
 
 environment
-  MEMEX_INDEX_DIR   where the index lives (default ~/.agents/memex)
-  MEMEX_AGENT       default for --agent
-  MEMEX_MODEL       default for --model
+  RECALL_INDEX_DIR   where the index lives (default ~/.agents/recall)
+  RECALL_AGENT       default for --agent
+  RECALL_MODEL       default for --model
 
 examples
-  memex "the one where I ported my claude skills and hooks to codex, then kimi, then cursor"
-  memex -r "yesterday's kimi session about the tycho dashboard being slow"
-  memex agent "the fedi e2e run that kept timing out"
-  memex agent -a codex -m gpt-5 "review of the miniapp api debugger"
-  memex -f codex -s 2026-09-01 hooks skills
-  memex grep 'AGENTS\.md.*symlink' -f claude -n 5
-  memex show a122183c
+  recall "the one where I ported my claude skills and hooks to codex, then kimi, then cursor"
+  recall -r "yesterday's kimi session about the tycho dashboard being slow"
+  recall agent "the fedi e2e run that kept timing out"
+  recall agent -a codex -m gpt-5 "review of the miniapp api debugger"
+  recall -f codex -s 2026-09-01 hooks skills
+  recall grep 'AGENTS\.md.*symlink' -f claude -n 5
+  recall show a122183c
 
 what gets indexed
   Claude Code   ~/.claude/projects/<slug>/<id>.jsonl, subagent agent-*.jsonl files skipped
@@ -1056,7 +1056,7 @@ const COMMANDS: &[&str] = &["agent", "search", "index", "grep", "show", "resume"
 fn parse_args() -> Args {
     let mut a = Args {
         cmd: String::new(), args: vec![], harness: None, project: None, since: None, until: None, limit: 10, json: false, all: false, full: false, no_refresh: false, threads: None, exclude: vec![],
-        agent: std::env::var("MEMEX_AGENT").unwrap_or_else(|_| "claude".into()), model: std::env::var("MEMEX_MODEL").ok(), resume: false,
+        agent: std::env::var("RECALL_AGENT").unwrap_or_else(|_| "claude".into()), model: std::env::var("RECALL_MODEL").ok(), resume: false,
     };
     let argv: Vec<String> = std::env::args().skip(1).collect();
     let mut i = 0;
@@ -1171,7 +1171,7 @@ fn ask(agent: &str, model: Option<&str>, prompt: &str) -> Result<String, String>
     match agent {
         "claude" => run_capture(Command::new("claude").args(["-p", prompt, "--model", model.unwrap_or("sonnet"), "--no-session-persistence", "--strict-mcp-config", "--mcp-config", r#"{"mcpServers":{}}"#, "--setting-sources", "", "--disallowedTools", "*"])),
         "codex" => {
-            let out = std::env::temp_dir().join(format!("memex-{}.txt", std::process::id()));
+            let out = std::env::temp_dir().join(format!("recall-{}.txt", std::process::id()));
             let mut c = Command::new("codex");
             c.args(["exec", "--ephemeral", "--skip-git-repo-check"]);
             if let Some(m) = model { c.args(["-m", m]); }

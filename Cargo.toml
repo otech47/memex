@@ -1,10 +1,10 @@
 [package]
-name = "memex"
+name = "recall"
 version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "memex"
+name = "recall"
 path = "src/main.rs"
 
 [dependencies]
